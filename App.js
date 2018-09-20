@@ -10,9 +10,11 @@ import {
   TextInput,
   Button,
   KeyboardAvoidingView,
+  AsyncStorage,
 } from 'react-native';
 
 const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+const TODO = "@todoapp.todo"
 
 export default class App extends React.Component {
   
@@ -22,6 +24,32 @@ export default class App extends React.Component {
       todo: [],
       currentIndex: 0,
       inputText: "",
+    }
+  }
+
+  componentDidMount() {
+    this.roadTodo()
+  }
+
+  roadTodo = async() => {
+    try{
+      const todoString = await AsyncStorage.getItem(TODO)
+      if (todoString) {
+        const todo = JSON.parse(todoString)
+        const currentIndex = todo.length
+        this.setState({todo: todo, currentIndex: currentIndex})
+      }
+    } catch(e){
+      console.log(e)
+    }
+  }
+
+  saveTodo = async(todo) => {
+    try {
+      const todoString = JSON.stringify(todo)
+      await AsyncStorage.setItem(TODO, todoString)
+    } catch(e){
+      console.log(e)
     }
   }
 
@@ -38,6 +66,7 @@ export default class App extends React.Component {
       currentIndex: index,
       inputText: ""
     })
+    this.saveTodo(todo)
   }
 
   render() {
@@ -45,7 +74,7 @@ export default class App extends React.Component {
       <KeyboardAvoidingView style={styles.container} behavior="padding" >
         {/* Filter */}
         <View style={styles.filter}>
-          <Text>filterを配置</Text>
+          <Text>ToDo アプリだよ</Text>
         </View>
         {/* todolist */}
         <ScrollView style={styles.todolist}>
