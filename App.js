@@ -24,6 +24,7 @@ export default class App extends React.Component {
       todo: [],
       currentIndex: 0,
       inputText: "",
+      filterText: "",
     }
   }
 
@@ -70,16 +71,29 @@ export default class App extends React.Component {
   }
 
   render() {
+
+    const filterText = this.state.filterText
+    let todo = this.state.todo
+    if (filterText != ""){
+      todo = todo.filter(t => t.title.includes(filterText))
+    }
+
+
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" >
         {/* Filter */}
         <View style={styles.filter}>
-          <Text>ToDo アプリだよ</Text>
+          <TextInput
+              onChangeText={(text) => this.setState({filterText: text})}
+              value={this.state.filterText}
+              style={styles.inputText}
+              placeholder="Type filter text"
+            />
         </View>
         {/* todolist */}
         <ScrollView style={styles.todolist}>
           {/* Flat listを実装 */}
-          <FlatList data={this.state.todo}
+          <FlatList data={todo}
             renderItem={({item}) => <Text>{item.title}</Text>}
             keyExtractor={(item, index) => "todo_" + item.index}
           />
@@ -91,6 +105,7 @@ export default class App extends React.Component {
             onChangeText={(text) => this.setState({inputText: text})}
             value={this.state.inputText}
             style={styles.inputText}
+            placeholder="Type your todo"
           />
 
           <Button
