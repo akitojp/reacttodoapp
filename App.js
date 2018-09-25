@@ -7,23 +7,42 @@ import {
   Platform,
   ScrollView,
   FlatList,
-  TextInput,
-  Button,
   KeyboardAvoidingView,
   AsyncStorage,
   TouchableOpacity,
 } from 'react-native';
 
-const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+import {
+  SearchBar,
+  Input,
+  Button,
+  ListItem,
+} from 'react-native-elements'
+
+import Icon from 'react-native-vector-icons/Feather'
+import Icon2 from 'react-native-vector-icons/MaterialIcons'
+
+import {
+  ifIphoneX,
+  getStatusBarHeight,
+} from 'react-native-iphone-x-helper'
+
+// const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+const STATUSBAR_HEIGHT = getStatusBarHeight()
 const TODO = "@todoapp.todo"
 const TodoItem = (props) => {
-  let textStyle = styles.TodoItem
+  let icon = null
   if (props.done === true ){
     textStyle = styles.todoItemDone
+    icon = <Icon2 name='done'/>
   }
   return (
     <TouchableOpacity onPress={props.onTapTodoItem}>
-      <Text style={textStyle}>{props.title}</Text>
+      <ListItem
+        title={props.title}
+        rightIcon={icon}
+        bottomDivider
+      />
     </TouchableOpacity>
   )
 }
@@ -31,7 +50,7 @@ const TodoItem = (props) => {
 export default class App extends React.Component {
   
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       todo: [],
       currentIndex: 0,
@@ -41,34 +60,34 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    this.roadTodo()
+    this.loadTodo()
   }
 
-  roadTodo = async() => {
-    try{
+  loadTodo = async () => {
+    try {
       const todoString = await AsyncStorage.getItem(TODO)
       if (todoString) {
         const todo = JSON.parse(todoString)
         const currentIndex = todo.length
         this.setState({todo: todo, currentIndex: currentIndex})
       }
-    } catch(e){
+    } catch (e) {
       console.log(e)
     }
   }
 
-  saveTodo = async(todo) => {
+  saveTodo = async (todo) => {
     try {
       const todoString = JSON.stringify(todo)
       await AsyncStorage.setItem(TODO, todoString)
-    } catch(e){
+    } catch (e) {
       console.log(e)
     }
   }
 
   onAddItem = () => {
     const title = this.state.inputText
-    if (title == ""){
+    if (title == "") {
       return
     }
     const index = this.state.currentIndex + 1
@@ -95,19 +114,22 @@ export default class App extends React.Component {
 
     const filterText = this.state.filterText
     let todo = this.state.todo
-    if (filterText != ""){
+    if (filterText !== ""){
       todo = todo.filter(t => t.title.includes(filterText))
     }
 
+    const platform = Platform.OS == 'ios' ? 'ios' : 'android'
 
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" >
         {/* Filter */}
         <View style={styles.filter}>
-          <TextInput
+          <SearchBar
+              platform={platform}
+              cancelButtonTitle="Cancel"
               onChangeText={(text) => this.setState({filterText: text})}
+              onClear={() => this.setState({filterText: ""})}
               value={this.state.filterText}
-              style={styles.inputText}
               placeholder="Type filter text"
             />
         </View>
@@ -120,7 +142,7 @@ export default class App extends React.Component {
               <TodoItem
                 title={item.title}
                 done={item.done}
-                onTapTodoItem={() => this.onTapTodoItem(todo)}
+                onTapTodoItem={() => this.onTapTodoItem(item)}
                 />
             }  
             keyExtractor={(item, index) => "todo_" + item.index}
@@ -129,7 +151,7 @@ export default class App extends React.Component {
         {/* input area */}
         <View style={styles.input}>
           
-          <TextInput
+          <Input
             onChangeText={(text) => this.setState({inputText: text})}
             value={this.state.inputText}
             style={styles.inputText}
@@ -137,10 +159,16 @@ export default class App extends React.Component {
           />
 
           <Button
+            icon={
+              <Icon
+                name = 'plus'
+                size={30}
+                color='white'
+              />
+            }
+            title=""
             onPress={this.onAddItem}
-            title="Add"
-            color="red"
-            style={styles.inputButton}
+            buttonStyle={styles.inputButton}
           />
         </View>
       </KeyboardAvoidingView>
@@ -155,24 +183,35 @@ const styles = StyleSheet.create({
     paddingTop: STATUSBAR_HEIGHT
   },
   filter: {
-    height: 30,
+    height:40,
   },
   todolist: {
     flex: 1,
+    marginTop:20,
   },
   input: {
-    height: 30,
+    ...ifIphoneX({
+      paddingBottom: 30,
+      height: 80,
+    }, {
+      height: 50,
+    }),
+    height: 70,
     flexDirection: 'row',
+    paddingRight: 20,
   },
   inputText: {
+    paddingLeft: 10,
+    paddingRight: 10,
     flex: 1,
-    borderBottomWidth: 1,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
   },
   inputButton: {
-    width: 100,
+    width: 48,
+    height: 48,
+    borderWidth: 0,
+    borderColor: 'transparent',
+    borderRadius: 48,
+    backgroundColor: '#ff6347', 
   },
   todoItem: {
     fontSize: 20,
@@ -183,3 +222,5 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
   }
 });
+
+
