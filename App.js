@@ -22,7 +22,13 @@ import {
 import Icon from 'react-native-vector-icons/Feather'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 
-const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+import {
+  ifIphoneX,
+  getStatusBarHeight,
+} from 'react-native-iphone-x-helper'
+
+// const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+const STATUSBAR_HEIGHT = getStatusBarHeight()
 const TODO = "@todoapp.todo"
 const TodoItem = (props) => {
   let icon = null
@@ -184,7 +190,13 @@ const styles = StyleSheet.create({
     marginTop:20,
   },
   input: {
-    height: 50,
+    ...ifIphoneX({
+      paddingBottom: 30,
+      height: 80,
+    }, {
+      height: 50,
+    }),
+    height: 70,
     flexDirection: 'row',
     paddingRight: 20,
   },
