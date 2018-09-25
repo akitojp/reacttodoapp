@@ -14,6 +14,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import {
+  SearchBar
+} from 'react-native-elements'
+
 const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
 const TODO = "@todoapp.todo"
 const TodoItem = (props) => {
@@ -99,15 +103,18 @@ export default class App extends React.Component {
       todo = todo.filter(t => t.title.includes(filterText))
     }
 
+    const platform = Platform.OS == 'ios' ? 'ios' : 'android'
 
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" >
         {/* Filter */}
         <View style={styles.filter}>
-          <TextInput
+          <SearchBar
+              platform={platform}
+              cancelButtonTitle="Cancel"
               onChangeText={(text) => this.setState({filterText: text})}
+              onClear={() => this.setState({filterText: ""})}
               value={this.state.filterText}
-              style={styles.inputText}
               placeholder="Type filter text"
             />
         </View>
